@@ -18,6 +18,18 @@ SEED_ISO="$IMG_DIR/seed-$VM_NAME.iso"
 echo "=== Rebuilding VM: $VM_NAME ==="
 
 # -------------------------------------------------
+# Generate a UNIQUE MAC address
+# -------------------------------------------------
+# 52:54:00 is the QEMU/KVM OUI prefix.
+# The last 3 bytes are randomized to guarantee uniqueness.
+# DHCP assigns IP based on MAC, so this prevents duplicate IPs.
+# -------------------------------------------------
+MAC_ADDRESS=$(printf '52:54:00:%02x:%02x:%02x\n' \
+  $((RANDOM%256)) $((RANDOM%256)) $((RANDOM%256)))
+
+echo "Using MAC address: $MAC_ADDRESS"
+
+# -------------------------------------------------
 # destroy + undefine if exists
 # -------------------------------------------------
 if virsh dominfo "$VM_NAME" &>/dev/null; then
@@ -70,14 +82,14 @@ cloud-localds seed-$VM_NAME.iso user-data meta-data
 sudo mv seed-$VM_NAME.iso "$SEED_ISO"
 
 # -------------------------------------------------
-# copy base image (simple full clone like before)
+# copy base image (full clone)
 # -------------------------------------------------
 echo "Creating VM disk..."
 sudo cp "$BASE_IMAGE" "$VM_DISK"
 sudo chown libvirt-qemu:kvm "$VM_DISK" 2>/dev/null || true
 
 # -------------------------------------------------
-# create VM
+# create VM with EXPLICIT MAC
 # -------------------------------------------------
 echo "Creating VM..."
 virt-install \
@@ -87,13 +99,15 @@ virt-install \
   --disk path="$VM_DISK",format=qcow2 \
   --disk path="$SEED_ISO",device=cdrom \
   --import \
-  --network network=default \
+  --network network=default,mac="$MAC_ADDRESS" \
   --graphics none \
   --osinfo ubuntu22.04 \
   --noautoconsole
 
 echo
 echo "✅ VM rebuilt successfully"
+echo "MAC: $MAC_ADDRESS"
+echo
 echo "Start with:"
 echo "  virsh start $VM_NAME"
 echo
