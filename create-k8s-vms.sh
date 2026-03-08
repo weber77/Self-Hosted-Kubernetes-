@@ -10,6 +10,7 @@ fi
 
 BASE_IMAGE="/var/lib/libvirt/images/jammy-server-cloudimg-amd64.img"
 IMAGE_URL="https://cloud-images.ubuntu.com/jammy/current/jammy-server-cloudimg-amd64.img"
+IMAGE_DIR="/var/lib/libvirt/images"
 
 echo "======================================"
 echo "Kubernetes VM Provisioner"
@@ -69,10 +70,15 @@ EOF
   sudo virsh net-autostart default
 fi
 
+if [ ! -d "$IMAGE_DIR" ]; then
+  echo "Creating image directory $IMAGE_DIR"
+  sudo mkdir -p "$IMAGE_DIR"
+fi
+
 # ------------------------------------------------
 # Ensure Ubuntu cloud image exists
 # ------------------------------------------------
-echo "Checking Ubuntu cloud image..."
+echo "=== Checking Ubuntu cloud image... ==="
 
 if [ ! -f "$BASE_IMAGE" ]; then
   echo "Downloading Ubuntu 22.04 cloud image..."
