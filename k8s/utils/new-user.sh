@@ -192,6 +192,8 @@ roleRef:
 EOF
 
 kubectl apply -f "${RBAC_YAML}"
+kubectl config set-credentials ${USERNAME} --client-certificate=${CRT_FILE} --client-key=${KEY_FILE}
+kubectl config set-context ${USERNAME}-context --cluster=kubernetes --namespace=${NAMESPACE} --user=${USERNAME} 
 
 echo "Created user cert and RBAC in ${OUT_DIR}/"
 echo "  key:  ${KEY_FILE}"
