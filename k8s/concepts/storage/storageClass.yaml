@@ -2,16 +2,7 @@ apiVersion: storage.k8s.io/v1
 kind: StorageClass
 metadata:
   name: standard
-provisioner: ebs.csi.aws.com
+provisioner: rancher.io/local-path
 reclaimPolicy: Retain # default value is Delete
 allowVolumeExpansion: true
-parameters:
-  type: pd-standard
-  encrypted: "true"
 volumeBindingMode: WaitForFirstConsumer # default value is Immediate
-allowedTopologies:
-  - matchLabelExpressions:
-      - key: topology.kubernetes.io/zone
-        values:
-          - us-central-1a
-          - us-central-1b
