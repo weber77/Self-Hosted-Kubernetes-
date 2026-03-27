@@ -154,17 +154,17 @@ The reliable lab bootstrap is:
 - Run `kubeadm init --control-plane-endpoint VIP:6443`
 - Then deploy kube-vip so it can “own” the VIP long-term (and later move it during failover)
 
-Run (adjust interface name if needed; on Ubuntu/libvirt it’s often `ens3`):
+Run (adjust interface name if needed; on Ubuntu/libvirt it’s often `enp1s0`):
 
 ```bash
 ip -o link show | awk -F': ' '{print $2}' | grep -E '^(ens|enp|eth)' | head -n1
 ```
 
-Assume it prints `ens3`. Then:
+Assume it prints `enp1s0`. Then:
 
 ```bash
 export VIP=192.168.122.50
-export IFACE=ens3
+export IFACE=enp1s0
 
 sudo ip addr add "${VIP}/32" dev "${IFACE}" || true
 sudo arping -I "${IFACE}" -c 3 "${VIP}" || true
